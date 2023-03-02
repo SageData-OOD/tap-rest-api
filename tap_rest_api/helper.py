@@ -89,7 +89,7 @@ def get_bookmark_type(config):
         return "datetime"
     if config.get("index_key"):
         return "index"
-    raise KeyError("You need to set timestamp_key, datetime_key, or index_key")
+    return None
 
 
 def get_streams_to_sync(streams, state):
@@ -163,6 +163,7 @@ def get_end(config):
     For human convenience, end_datetime (more human readable) is also looked
     up when timestamp_key is set but end_timestamp is not set.
     """
+    end_from_config = None
     if config.get("timestamp_key"):
         end_from_config = config.get("end_timestamp")
         if end_from_config is None:
@@ -235,9 +236,7 @@ def get_last_update(config, record, current):
             last_update = current_index
         else:
             KeyError("index_key not found in the record")
-    else:
-        raise KeyError(
-            "Neither timestamp_key, datetime_key, or index_key is set")
+            
     return last_update
 
 
