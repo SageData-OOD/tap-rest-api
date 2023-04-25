@@ -1,4 +1,4 @@
-import attr, backoff, dateutil, datetime, hashlib, os, requests
+import attr,  dateutil, datetime, hashlib, os, requests
 import simplejson as json
 from urllib.parse import quote as urlquote
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -24,6 +24,7 @@ EXTRACT_TIMESTAMP = "_sdc_extracted_at"
 # The timestamp of the record submit to the destination
 # (kept null at extraction)
 BATCH_TIMESTAMP = "_sdc_batched_at"
+RECORD_DATETIME = "_record_datetime"
 
 
 @attr.s
@@ -340,3 +341,14 @@ def generate_request(stream_id, url, auth_method="no_auth", headers=None,
         timer.tags[metrics.Tag.http_status_code] = resp.status_code
         resp.raise_for_status()
         return resp.json()
+    
+
+def remove_datetime_format(schema):
+    """ Remove datetime format from schema"""
+    if isinstance(schema, dict):
+        schema.pop("format", None) if schema.get("format") == "date-time" else None
+        for _, value in schema.items():
+            remove_datetime_format(value)
+    elif isinstance(schema, list):
+        for item in schema:
+            remove_datetime_format(item)

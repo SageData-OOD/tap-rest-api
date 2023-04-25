@@ -5,6 +5,7 @@ from singer import utils
 
 from .helper import (generate_request, get_endpoint, get_init_endpoint_params,
                      get_record, get_record_list, get_http_headers,
+                     remove_datetime_format,
                      EXTRACT_TIMESTAMP, BATCH_TIMESTAMP)
 import getschema
 import jsonschema
@@ -92,6 +93,10 @@ def infer_schema(config, streams, out_catalog=True, add_tstamp=True):
         # In case the record is not at the root level
         data = get_record_list(data, config.get("record_list_level"))
         schema = getschema.infer_schema(data, config.get("record_level"))
+
+        # code to remove recursively the format property from the schema when its value
+        # is "date-time" as it is not supported by JSON schema
+        remove_datetime_format(schema)
 
         if add_tstamp:
             timestamp_format = {"type": ["null", "string"],
